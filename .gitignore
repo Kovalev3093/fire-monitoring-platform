@@ -1,0 +1,22 @@
+# Airflow
+airflow/logs/
+airflow/plugins/
+__pycache__/
+*.pyc
+
+# ClickHouse
+clickhouse/data/
+clickhouse/config/
+
+# MinIO
+minio/data/
+
+# Postgres
+postgres/data/
+
+# Docker
+.dockerignore
+
+# Data
+data/raw/
+data/processed/
