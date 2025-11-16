@@ -22,34 +22,35 @@ services:
     volumes:
       - ./minio/data:/data
 
-  airflow:
-    image: apache/airflow:2.7.0
-    environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-    ports:
-      - "8080:8080"
-    command: >
-      bash -c "
-        airflow db init &&
-        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
-        airflow webserver
-      "
-    depends_on:
-      - postgres
-    volumes:
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/logs:/opt/airflow/logs
-
   clickhouse:
     image: clickhouse/clickhouse-server:23.8
     ports:
-      - "8123:8123"  # HTTP интерфейс
-      - "9004:9000"  # Native клиент
+      - "8123:8123"
+      - "9004:9000"
     environment:
       CLICKHOUSE_DB: fire_analytics
       CLICKHOUSE_USER: admin
       CLICKHOUSE_PASSWORD: admin
     volumes:
       - ./clickhouse/data:/var/lib/clickhouse
+
+  airflow:
+    image: apache/airflow:2.7.0
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com &&
+        airflow scheduler &
+        airflow webserver
+      "
+    depends_on:
+      - postgres
